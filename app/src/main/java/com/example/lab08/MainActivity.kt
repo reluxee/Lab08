@@ -53,7 +53,6 @@ fun TaskScreen(viewModel: TaskViewModel) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Campo de texto para nueva tarea
         TextField(
             value = newTaskDescription,
             onValueChange = { newTaskDescription = it },
@@ -63,7 +62,6 @@ fun TaskScreen(viewModel: TaskViewModel) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón para agregar tarea
         Button(
             onClick = {
                 if (newTaskDescription.isNotEmpty()) {
@@ -78,7 +76,6 @@ fun TaskScreen(viewModel: TaskViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar las tareas
         tasks.forEach { task ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -108,7 +105,6 @@ fun TaskScreen(viewModel: TaskViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para eliminar todas las tareas
         Button(
             onClick = { coroutineScope.launch { viewModel.deleteAllTasks() } },
             modifier = Modifier.fillMaxWidth()
@@ -116,7 +112,6 @@ fun TaskScreen(viewModel: TaskViewModel) {
             Text("Eliminar todas las tareas")
         }
 
-        // Diálogo para editar tarea
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
