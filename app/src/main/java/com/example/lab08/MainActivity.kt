@@ -43,12 +43,17 @@ fun TaskScreen(viewModel: TaskViewModel) {
     val coroutineScope = rememberCoroutineScope()
     var newTaskDescription by remember { mutableStateOf("") }
 
+    // Variables para editar tareas
+    var showDialog by remember { mutableStateOf(false) }
+    var editableTask by remember { mutableStateOf<Task?>(null) }
+    var editedDescription by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // Campo de texto para nueva tarea
         TextField(
             value = newTaskDescription,
             onValueChange = { newTaskDescription = it },
@@ -56,7 +61,9 @@ fun TaskScreen(viewModel: TaskViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
 
+        // Botón para agregar tarea
         Button(
             onClick = {
                 if (newTaskDescription.isNotEmpty()) {
@@ -64,33 +71,79 @@ fun TaskScreen(viewModel: TaskViewModel) {
                     newTaskDescription = ""
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Agregar tarea")
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
-
+        // Mostrar las tareas
         tasks.forEach { task ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = task.description)
-                Button(onClick = { viewModel.toggleTaskCompletion(task) }) {
-                    Text(if (task.isCompleted) "Completada" else "Pendiente")
+
+                Row {
+                    Button(onClick = {
+                        editableTask = task
+                        editedDescription = task.description
+                        showDialog = true
+                    }) {
+                        Text("Editar")
+                    }
+
+                    Button(onClick = { viewModel.toggleTaskCompletion(task) }) {
+                        Text(if (task.isCompleted) "Completada" else "Pendiente")
+                    }
+
+                    Button(onClick = { viewModel.deleteTask(task) }) {
+                        Text("Eliminar")
+                    }
                 }
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Botón para eliminar todas las tareas
         Button(
             onClick = { coroutineScope.launch { viewModel.deleteAllTasks() } },
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Eliminar todas las tareas")
+        }
+
+        // Diálogo para editar tarea
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Editar Tarea") },
+                text = {
+                    TextField(
+                        value = editedDescription,
+                        onValueChange = { editedDescription = it },
+                        label = { Text("Descripción") }
+                    )
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        editableTask?.let {
+                            viewModel.updateTaskDescription(it, editedDescription)
+                        }
+                        showDialog = false
+                    }) {
+                        Text("Guardar")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDialog = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
         }
     }
 }
